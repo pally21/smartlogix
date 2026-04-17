@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.tgz
+.scannerwork/
+coverage/
+dist/
+target/
+*.log
+.DS_Store
