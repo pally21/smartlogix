@@ -1,12 +1,13 @@
 ================================================================
 SMARTLOGIX — ENLACES A REPOSITORIOS GITHUB
 Evaluación Parcial N°2 | Duoc UC | Abril 2026
+Usuario GitHub: pally21
 ================================================================
 
 REPOSITORIO PRINCIPAL
 ---------------------
 Nombre:      smartlogix
-URL:         https://github.com/TU_USUARIO/smartlogix
+URL:         https://github.com/pally21/smartlogix
 Descripción: Repositorio principal del proyecto. Contiene el
              docker-compose.yml, nginx, db-init, documentación
              y todos los componentes del sistema SmartLogix.
@@ -16,7 +17,7 @@ Descripción: Repositorio principal del proyecto. Contiene el
 COMPONENTES FRONTEND
 ---------------------
 Nombre:      smartlogix-frontend
-URL:         https://github.com/TU_USUARIO/smartlogix-frontend
+URL:         https://github.com/pally21/smartlogix-frontend
 Descripción: Interfaz de usuario desarrollada con React 18 y Vite.
              Empaquetada como componente NPM (@smartlogix/frontend).
              Incluye vistas de Dashboard, Inventario, Pedidos,
@@ -29,7 +30,7 @@ COMPONENTES BACKEND
 
 [BFF]
 Nombre:      smartlogix-bff
-URL:         https://github.com/TU_USUARIO/smartlogix-bff
+URL:         https://github.com/pally21/smartlogix-bff
 Descripción: Backend For Frontend desarrollado en Node.js + Express.
              Actúa como capa de agregación entre el frontend y los
              microservicios. Aplica rate limiting (100 req/min),
@@ -37,7 +38,7 @@ Descripción: Backend For Frontend desarrollado en Node.js + Express.
 
 [Microservicio 1]
 Nombre:      smartlogix-inventory
-URL:         https://github.com/TU_USUARIO/smartlogix-inventory
+URL:         https://github.com/pally21/smartlogix-inventory
 Descripción: Microservicio de gestión de inventario (Node.js +
              PostgreSQL). Administra productos, stock por bodega
              y alertas de stock mínimo. Implementa los patrones
@@ -45,7 +46,7 @@ Descripción: Microservicio de gestión de inventario (Node.js +
 
 [Microservicio 2]
 Nombre:      smartlogix-orders
-URL:         https://github.com/TU_USUARIO/smartlogix-orders
+URL:         https://github.com/pally21/smartlogix-orders
 Descripción: Microservicio de procesamiento de pedidos (Node.js +
              PostgreSQL). Gestiona el ciclo de vida completo de
              un pedido: creación, validación de stock, coordinación
@@ -53,7 +54,7 @@ Descripción: Microservicio de procesamiento de pedidos (Node.js +
 
 [Microservicio 3]
 Nombre:      smartlogix-shipping
-URL:         https://github.com/TU_USUARIO/smartlogix-shipping
+URL:         https://github.com/pally21/smartlogix-shipping
 Descripción: Microservicio de gestión de envíos (Node.js +
              PostgreSQL). Administra despachos con número de
              tracking automático y seguimiento de estados
@@ -61,7 +62,7 @@ Descripción: Microservicio de gestión de envíos (Node.js +
 
 [Microservicio 4]
 Nombre:      smartlogix-payment
-URL:         https://github.com/TU_USUARIO/smartlogix-payment
+URL:         https://github.com/pally21/smartlogix-payment
 Descripción: Microservicio de pagos (Node.js). Integra Stripe y
              MercadoPago para procesar intenciones de pago,
              consultar estados y gestionar reembolsos.
@@ -71,7 +72,7 @@ Descripción: Microservicio de pagos (Node.js). Integra Stripe y
 ARQUETIPOS MAVEN
 ---------------------
 Nombre:      smartlogix-archetypes
-URL:         https://github.com/TU_USUARIO/smartlogix-archetypes
+URL:         https://github.com/pally21/smartlogix-archetypes
 Descripción: Colección de 3 arquetipos Maven que sirven como
              plantillas base para generar componentes backend:
              - archetype-bff: BFF con Spring Boot + WebFlux
