@@ -1,3 +1,15 @@
+Repositorio principal: https://github.com/<owner>/smartlogix - DOCUMENTACIÓN GENERAL
+
+Frontend: https://github.com/<owner>/smartlogix-frontend
+
+Backend / Microservicios:
+- inventory-service: https://github.com/<owner>/smartlogix-inventory-service
+- orders-service: https://github.com/<owner>/smartlogix-orders-service
+- payment-service: https://github.com/<owner>/smartlogix-payment-service
+- shipping-service: https://github.com/<owner>/smartlogix-shipping-service
+- bff-service: https://github.com/<owner>/smartlogix-bff-service
+
+Notas: Reemplaza <owner> y las URLs con los enlaces reales de los repositorios antes de entregar.
 ================================================================
 SMARTLOGIX — ENLACES A REPOSITORIOS GITHUB
 Evaluación Parcial N°2 | Duoc UC | Abril 2026

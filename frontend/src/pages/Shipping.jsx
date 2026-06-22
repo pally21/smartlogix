@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { inventoryApi, ordersApi, shippingApi } from '../services/api';
-
 const STATUS_MAP = {
   PENDING:           { cls: 'badge-gray',   label: 'Pendiente' },
   PICKED_UP:         { cls: 'badge-blue',   label: 'Recogido' },
@@ -10,12 +9,10 @@ const STATUS_MAP = {
   DELIVERED:         { cls: 'badge-green',  label: 'Entregado' },
   FAILED:            { cls: 'badge-red',    label: 'Fallido' },
 };
-
 const NEXT_STATUS = {
   PENDING: 'PICKED_UP', PICKED_UP: 'IN_TRANSIT', IN_TRANSIT: 'OUT_FOR_DELIVERY',
   OUT_FOR_DELIVERY: 'DELIVERED',
 };
-
 export default function Shipping() {
   const [shipments, setShipments] = useState([]);
   const [products, setProducts] = useState([]);
@@ -41,7 +38,6 @@ export default function Shipping() {
     weight: '',
     estimatedDelivery: '',
   });
-
   const load = () => {
     setLoading(true);
     Promise.all([shippingApi.getShipments(), inventoryApi.getProducts(), inventoryApi.getWarehouses(), ordersApi.getOrders()])
@@ -64,9 +60,7 @@ export default function Shipping() {
       .catch(() => toast.error('Error al cargar envíos'))
       .finally(() => setLoading(false));
   };
-
   useEffect(() => { load(); }, []);
-
   const parseAddressParts = (address = '') => {
     const parts = String(address).split(',').map((p) => p.trim()).filter(Boolean);
     if (parts.length >= 3) {
@@ -79,7 +73,6 @@ export default function Shipping() {
     if (parts.length === 2) return { address: parts[0], comuna: '', city: parts[1] };
     return { address: parts[0] || '', comuna: '', city: '' };
   };
-
   const applyWarehouseToOrigin = (warehouseId) => {
     const selected = warehouses.find((w) => w.id === warehouseId);
     if (!selected) return;
@@ -92,7 +85,6 @@ export default function Shipping() {
       originCity: parsed.city || prev.originCity,
     }));
   };
-
   const inferWarehouseByProduct = (productId) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return warehouses[0]?.id || '';
@@ -101,7 +93,6 @@ export default function Shipping() {
     const best = [...stocks].sort((a, b) => Number(b.quantity || 0) - Number(a.quantity || 0))[0];
     return best?.warehouseId || warehouses[0]?.id || '';
   };
-
   const autofillFromOrder = async () => {
     const orderNumber = form.orderNumber?.trim();
     const directOrderId = form.orderId?.trim();
@@ -114,25 +105,16 @@ export default function Shipping() {
       let resolvedOrderId = directOrderId;
       if (!resolvedOrderId && orderNumber) {
         const found = orders.find((o) => o.orderNumber === orderNumber);
-        if (!found) {
-          toast.error('N° de pedido no encontrado');
-          return;
-        }
+        if (!found) { toast.error('N° de pedido no encontrado'); return; }
         resolvedOrderId = found.id;
       }
-
       const res = await ordersApi.getOrder(resolvedOrderId);
       const order = res.data;
-      if (!order) {
-        toast.error('Pedido no encontrado');
-        return;
-      }
-
+      if (!order) { toast.error('Pedido no encontrado'); return; }
       const firstItem = order.items?.[0];
       const productId = firstItem?.productId || '';
       const inferredWarehouseId = productId ? inferWarehouseByProduct(productId) : (warehouses[0]?.id || '');
       const destination = parseAddressParts(order.shippingAddress || '');
-
       setForm((prev) => ({
         ...prev,
         orderId: order.id || resolvedOrderId,
@@ -143,7 +125,6 @@ export default function Shipping() {
         destinationComuna: destination.comuna || prev.destinationComuna,
         destinationCity: destination.city || prev.destinationCity,
       }));
-
       if (inferredWarehouseId) applyWarehouseToOrigin(inferredWarehouseId);
       toast.success('Pedido cargado y formulario autocompletado');
     } catch (err) {
@@ -152,7 +133,6 @@ export default function Shipping() {
       setLoadingOrderData(false);
     }
   };
-
   const handleTrack = async () => {
     if (!trackInput.trim()) return;
     try {
@@ -160,7 +140,6 @@ export default function Shipping() {
       setTrackResult(res.data);
     } catch { toast.error('Número de tracking no encontrado'); setTrackResult(null); }
   };
-
   const handleAdvance = async (id, currentStatus) => {
     const next = NEXT_STATUS[currentStatus];
     if (!next) return;
@@ -170,7 +149,6 @@ export default function Shipping() {
       load();
     } catch (err) { toast.error(err.message); }
   };
-
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
@@ -188,26 +166,19 @@ export default function Shipping() {
         productId: products[0]?.id || '',
         warehouseId: warehouses[0]?.id || '',
         carrier: 'Starken',
-        originAddress: '',
-        originComuna: '',
-        originCity: '',
-        destinationAddress: '',
-        destinationComuna: '',
-        destinationCity: '',
-        weight: '',
-        estimatedDelivery: '',
+        originAddress: '', originComuna: '', originCity: '',
+        destinationAddress: '', destinationComuna: '', destinationCity: '',
+        weight: '', estimatedDelivery: '',
       });
       load();
     } catch (err) { toast.error(err.message); }
   };
-
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div><h2>Coordinación de Envíos</h2><p>Tracking y gestión de despachos</p></div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Nuevo Envío</button>
       </div>
-
       {/* Tracking público */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem' }}>🔍 Rastrear Envío</h3>
@@ -227,7 +198,6 @@ export default function Shipping() {
           </div>
         )}
       </div>
-
       {/* Lista de envíos */}
       <div className="card">
         {loading ? <div className="loading">Cargando...</div> : (
@@ -243,8 +213,8 @@ export default function Shipping() {
                   <tr key={s.id}>
                     <td><code style={{ fontSize: '0.78rem' }}>{s.trackingNumber}</code></td>
                     <td style={{ fontSize: '0.8rem' }}>{orders.find((o) => o.id === s.orderId)?.orderNumber || (s.orderId?.slice(0, 8) + '...')}</td>
-                    <td style={{ fontSize: '0.8rem' }}>{s.productId ? s.productId.slice(0, 8) : '—'}</td>
-                    <td style={{ fontSize: '0.8rem' }}>{s.warehouseId ? s.warehouseId.slice(0, 8) : '—'}</td>
+                    <td style={{ fontSize: '0.8rem' }}>{s.productName || (s.productId ? s.productId.slice(0, 8) + '...' : '—')}</td>
+                    <td style={{ fontSize: '0.8rem' }}>{s.warehouseName || (s.warehouseId ? s.warehouseId.slice(0, 8) + '...' : '—')}</td>
                     <td>{s.carrier}</td>
                     <td><span className={`badge ${STATUS_MAP[s.status]?.cls || 'badge-gray'}`}>{STATUS_MAP[s.status]?.label || s.status}</span></td>
                     <td style={{ fontSize: '0.8rem' }}>{s.estimatedDelivery ? new Date(s.estimatedDelivery).toLocaleDateString('es-CL') : '—'}</td>
@@ -269,7 +239,6 @@ export default function Shipping() {
           </div>
         )}
       </div>
-
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -298,11 +267,11 @@ export default function Shipping() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div className="form-group">
-                  <label>Producto (ID)</label>
+                  <label>Producto</label>
                   <select value={form.productId} onChange={e => setForm({...form, productId: e.target.value})}>
                     <option value="">Seleccionar producto...</option>
                     {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} — {p.id.slice(0, 8)}</option>
+                      <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
                 </div>
@@ -311,7 +280,7 @@ export default function Shipping() {
                   <select value={form.warehouseId} onChange={e => applyWarehouseToOrigin(e.target.value)}>
                     <option value="">Seleccionar bodega...</option>
                     {warehouses.map(w => (
-                      <option key={w.id} value={w.id}>{w.name} ({w.location || 'sin ubicación'})</option>
+                      <option key={w.id} value={w.id}>{w.name}</option>
                     ))}
                   </select>
                 </div>
@@ -329,7 +298,7 @@ export default function Shipping() {
                 </div>
               </div>
               <div className="form-group">
-                <label>Origen</label>
+                <label>Dirección origen</label>
                 <input value={form.originAddress} onChange={e => setForm({...form, originAddress: e.target.value})} placeholder="Bodega de origen" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -343,7 +312,7 @@ export default function Shipping() {
                 </div>
               </div>
               <div className="form-group">
-                <label>Destino</label>
+                <label>Dirección destino</label>
                 <input value={form.destinationAddress} onChange={e => setForm({...form, destinationAddress: e.target.value})} placeholder="Dirección del cliente" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>

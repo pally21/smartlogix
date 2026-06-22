@@ -7,7 +7,8 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "jest --coverage",
-    "test:ci": "jest --coverage --coverageReporters=lcov"
+    "test:ci": "jest --coverage --coverageReporters=lcov",
+    "test:e2e": "jest __tests__/order.integration.test.js --runInBand"
   },
   "dependencies": {
     "express": "^4.18.2",

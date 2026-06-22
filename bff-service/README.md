@@ -1,3 +1,26 @@
+# BFF Service (Backend For Frontend)
+
+Descripción: Punto de entrada del frontend. Orquesta llamadas a microservicios internos (`/api/inventory`, `/api/orders`, `/api/shipping`, `/api/payment`).
+
+Instalación y ejecución:
+
+```bash
+cd bff-service
+npm install
+npm run dev
+npm start
+```
+
+Health check: `GET /health`.
+
+Pruebas y cobertura:
+
+```bash
+npm test -- --coverage
+# Reporte: coverage/lcov-report y reports/coverage/bff-service-coverage.pdf
+```
+
+Cliente HTTP central en `src/httpClient.js`.
 # SmartLogix BFF Service
 
 Backend For Frontend (BFF) de SmartLogix. Actúa como capa de agregación entre el frontend y los microservicios, simplificando las llamadas del cliente y aplicando rate limiting y seguridad centralizada.

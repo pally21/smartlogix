@@ -1,3 +1,29 @@
+# Shipping Service
+
+Descripción: Gestión de envíos, tracking y actualización de estado.
+
+Instalación y ejecución:
+
+```bash
+cd shipping-service
+npm install
+npm run dev
+npm start
+```
+
+Endpoints relevantes:
+- `GET /` — listar envíos
+- `GET /:id` — detalle
+- `GET /track/:trackingNumber` — tracking público
+- `POST /` — crear envío
+- `PUT /:id/status` — actualizar estado
+
+Pruebas:
+
+```bash
+npm test -- --coverage
+# Reporte: coverage/lcov-report y reports/coverage/shipping-service-coverage.pdf
+```
 # SmartLogix Shipping Service
 
 Microservicio de gestión de envíos de SmartLogix. Administra el ciclo de vida de los despachos: creación, seguimiento por número de tracking y actualización de estados.

@@ -1,0 +1,42 @@
+{
+  "openPaths": [
+    "/api/dashboard/summary",
+    "/api/inventory/products",
+    "/api/inventory/products/{id}",
+    "/api/inventory/products/{id}/stock",
+    "/api/inventory/warehouses",
+    "/api/inventory/warehouses/{id}",
+    "/api/orders",
+    "/api/orders/{id}",
+    "/api/orders/{id}/confirm-payment",
+    "/api/orders/{id}/status",
+    "/api/payment/create-intent",
+    "/api/payment/{paymentId}/refund",
+    "/api/payment/{paymentId}/status",
+    "/api/shipping",
+    "/api/shipping/track/{trackingNumber}",
+    "/api/shipping/{id}",
+    "/api/shipping/{id}/status"
+  ],
+  "bffPaths": [
+    "/api/dashboard/summary",
+    "/api/inventory/products",
+    "/api/inventory/products/{id}",
+    "/api/inventory/products/{id}/stock",
+    "/api/inventory/warehouses",
+    "/api/inventory/warehouses/{id}",
+    "/api/orders",
+    "/api/orders/{id}",
+    "/api/orders/{id}/confirm-payment",
+    "/api/orders/{id}/status",
+    "/api/payment/create-intent",
+    "/api/payment/{paymentId}/refund",
+    "/api/payment/{paymentId}/status",
+    "/api/shipping",
+    "/api/shipping/track/{trackingNumber}",
+    "/api/shipping/{id}",
+    "/api/shipping/{id}/status"
+  ],
+  "onlyInOpenapi": [],
+  "onlyInBff": []
+}

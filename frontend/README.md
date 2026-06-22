@@ -1,3 +1,23 @@
+# Frontend — SmartLogix
+
+Proyecto React + Vite para la UI.
+
+Instalación y ejecución en desarrollo:
+
+```bash
+cd frontend
+npm install
+npm run dev   # abre en localhost:3000
+```
+
+Build para producción:
+
+```bash
+npm run build
+# Salida en dist/
+```
+
+Tests: este proyecto no incluye tests unitarios por defecto (use frameworks como Vitest si desea añadirlos).
 # SmartLogix Frontend
 
 Interfaz de usuario para el sistema de gestión logística SmartLogix. Desarrollada con React 18 y Vite, empaquetada como componente NPM.

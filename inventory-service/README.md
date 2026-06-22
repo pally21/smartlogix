@@ -1,3 +1,28 @@
+# Inventory Service
+
+Descripción: Microservicio que gestiona productos, stock y bodegas.
+
+Requisitos:
+- Node.js >=18
+
+Instalación y ejecución:
+
+```bash
+cd inventory-service
+npm install
+npm run dev   # nodemon
+npm start     # producción
+```
+
+Pruebas y cobertura:
+
+```bash
+npm test -- --coverage
+# Los reportes HTML quedan en coverage/lcov-report; el PDF global está en reports/coverage/inventory-service-coverage.pdf
+```
+
+Notas:
+- Controladores en `src/controllers`, rutas en `src/routes`.
 # SmartLogix Inventory Service
 
 Microservicio de gestión de inventario de SmartLogix. Administra productos, stock por bodega y alertas de stock mínimo.

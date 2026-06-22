@@ -1,3 +1,24 @@
+# Payment Service
+
+Descripción: Proveedor de pagos (Stripe/MercadoPago). Maneja intents, webhooks y reembolsos.
+
+Instalación y ejecución:
+
+```bash
+cd payment-service
+npm install
+npm run dev
+npm start
+```
+
+Pruebas y cobertura:
+
+```bash
+npm test -- --coverage
+# Reporte: coverage/lcov-report y reports/coverage/payment-service-coverage.pdf
+```
+
+Webhooks: `POST /webhook` y `POST /mercadopago/webhook`.
 # SmartLogix Payment Service
 
 Microservicio de pagos de SmartLogix. Integra Stripe y MercadoPago para procesar intenciones de pago, consultar estados y gestionar reembolsos.

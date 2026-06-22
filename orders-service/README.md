@@ -1,3 +1,24 @@
+# Orders Service
+
+Descripción: Gestión de órdenes de venta.
+
+Instalación y ejecución:
+
+```bash
+cd orders-service
+npm install
+npm run dev
+npm start
+```
+
+Pruebas:
+
+```bash
+npm test -- --coverage
+# Reporte: coverage/lcov-report y reports/coverage/orders-service-coverage.pdf
+```
+
+Rutas principales: `GET /`, `GET /:id`, `POST /`, `PUT /:id/status`, `POST /:id/confirm-payment`.
 # SmartLogix Orders Service
 
 Microservicio de procesamiento de pedidos de SmartLogix. Gestiona el ciclo de vida completo de un pedido: creación, validación de stock, coordinación con envío y actualización de estados.
