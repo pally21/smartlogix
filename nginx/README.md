@@ -1,12 +1,19 @@
 Este directorio contiene la configuración de Nginx para el API Gateway.
 
 Certificados
-- `server.crt` y `server.key` son ejemplos auto-firmados para desarrollo.
-- **No** comites claves privadas en producción. Reemplaza por certificados Let’s Encrypt y elimina las claves privadas del repositorio.
+
+Let's Encrypt (ACME) automation
+- Recomendado flujo (producción):
+	1. Parar `api-gateway` que ocupa puertos 80/443 localmente.
+	2. Ejecutar `./scripts/obtain_certs.sh yourdomain.com www.yourdomain.com` desde la raíz del repo.
+		 - Esto ejecuta `certbot` en un contenedor Docker usando `webroot` (el helper crea `nginx/html` para el challenge).
+	3. Los certificados se escribirán en `nginx/certs/live/<domain>/`.
+	4. Reinicia `docker-compose up -d api-gateway` para que OpenResty cargue los nuevos certificados.
+
+Notas de seguridad
+- Nunca comites claves privadas ni las expongas en repositorios públicos.
+- Después de generar certificados en producción, añade `nginx/certs/*.key` a `.gitignore` (ya está incluido) y almacena copias en un vault o en el host.
 
 Ignorar claves
-- Añade `nginx/certs/*.key` a `.gitignore` y coloca tus claves en una ruta segura fuera del control de versiones.
 
 Validación JWT en Gateway (opcional)
-- Para validar JWT en Nginx se recomienda usar OpenResty + `lua-resty-jwt` o un módulo compilado. Esto requiere construir una imagen personalizada de Nginx/OpenResty con las librerías Lua necesarias.
-- En este repo la validación primaria se hace en el BFF; si quieres que la validación se haga en el Gateway puedo generar la imagen y la configuración Lua.
