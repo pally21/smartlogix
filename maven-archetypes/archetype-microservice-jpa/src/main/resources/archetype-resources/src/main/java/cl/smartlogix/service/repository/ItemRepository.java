@@ -1,0 +1,11 @@
+package cl.smartlogix.service.repository;
+
+import cl.smartlogix.service.model.${entityName};
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface ${entityName}Repository extends JpaRepository<${entityName}, UUID> {
+}

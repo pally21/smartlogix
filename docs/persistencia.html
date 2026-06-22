@@ -1,0 +1,383 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Persistencia — SmartLogix</title><style>body{font-family:Arial,Helvetica,sans-serif;padding:20px}h1,h2{color:#222}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px;text-align:left}pre{background:#f5f5f5;padding:10px;overflow:auto}</style></head><body>
+<h1>Documento de Persistencia — SmartLogix</h1>
+<p>Generado: 2026-06-12T02:32:33.036Z</p>
+<h2>Resumen general</h2>
+<ul>
+<li>Motor de base de datos: PostgreSQL</li>
+<li>ORM/mapper: Sequelize (Node.js) — equivalente a JPA en Java</li>
+<li>Patrón: cada microservicio gestiona su propia BD (DB per service)</li>
+<li>Conexión: variables de entorno `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`</li>
+</ul>
+<h2>inventory-service</h2>
+<h3>Modelos / Entidades</h3>
+<table><thead><tr><th>Modelo</th><th>Tabla</th><th>Campos principales</th></tr></thead><tbody>
+<tr><td>Product</td><td>products</td><td>id, sku, name, description, category, price</td></tr>
+<tr><td>Stock</td><td>stocks</td><td>id, productId, warehouseId, quantity, reservedQuantity</td></tr>
+<tr><td>Warehouse</td><td>warehouses</td><td>id, name, location, capacity, isActive</td></tr>
+<tr><td>index</td><td>—</td><td></td></tr>
+</tbody></table>
+<h3>Fragmentos de código (primeras líneas)</h3>
+<h4>Product.js</h4>
+<pre>const { DataTypes } = require('sequelize');
+
+// ── Entidad Producto (@Entity equivalente) ───────────────────────────────────
+module.exports = (sequelize) =&gt; sequelize.define('Product', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  sku: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    unique: true,
+  },
+  name: {
+    type: DataTypes.STRING(200),
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  category: {
+    type: DataTypes.STRING(100),
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0,
+  },
+  unit: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'unidad',
+  },
+  minStock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 5,
+    field: 'min_stock',
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    field: 'is_active',
+  },
+}, {
+  tableName: 'products',
+  timestamps: true,
+  underscored: true,
+});
+</pre>
+<h4>Stock.js</h4>
+<pre>const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) =&gt; sequelize.define('Stock', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  productId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'product_id',
+  },
+  warehouseId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'warehouse_id',
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  reservedQuantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'reserved_quantity',
+  },
+}, {
+  tableName: 'stocks',
+  timestamps: true,
+  underscored: true,
+});
+</pre>
+<h4>Warehouse.js</h4>
+<pre>const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) =&gt; sequelize.define('Warehouse', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING(150),
+    allowNull: false,
+  },
+  location: {
+    type: DataTypes.STRING(250),
+  },
+  capacity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1000,
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    field: 'is_active',
+  },
+}, {
+  tableName: 'warehouses',
+  timestamps: true,
+  underscored: true,
+});
+</pre>
+<h4>index.js</h4>
+<pre>const { Sequelize } = require('sequelize');
+
+// ── Conexión a PostgreSQL (equivalente a JPA DataSource) ─────────────────────
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'inventorydb',
+  process.env.DB_USER || 'smartlogix',
+  process.env.DB_PASSWORD || 'smartlogix123',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false,
+    pool: { max: 10, min: 0, acquire: 30000, idle: 10000 },
+  }
+);
+
+// ── Entidades (equivalente a @Entity en JPA) ──────────────────────────────────
+const Product = require('./Product')(sequelize);
+const Warehouse = require('./Warehouse')(sequelize);
+const Stock = require('./Stock')(sequelize);
+
+// ── Relaciones ────────────────────────────────────────────────────────────────
+Product.hasMany(Stock, { foreignKey: 'productId', as: 'stocks' });
+Warehouse.hasMany(Stock, { foreignKey: 'warehouseId', as: 'stocks' });
+Stock.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+Stock.belongsTo(Warehouse, { foreignKey: 'warehouseId', as: 'warehouse' });
+
+module.exports = { sequelize, Product, Warehouse, Stock };
+</pre>
+<h3>Relaciones y notas</h3>
+<p>Relaciones: <code>Product.hasMany(Stock)</code>, <code>Warehouse.hasMany(Stock)</code>, <code>Stock.belongsTo(Product)</code>.</p>
+<p>Tablas: <code>products</code>, <code>stocks</code>, <code>warehouses</code>.</p>
+<h2>orders-service</h2>
+<h3>Modelos / Entidades</h3>
+<table><thead><tr><th>Modelo</th><th>Tabla</th><th>Campos principales</th></tr></thead><tbody>
+<tr><td>Order</td><td>orders</td><td>id, orderNumber, customerId, customerName, customerEmail, status</td></tr>
+<tr><td>OrderItem</td><td>order_items</td><td>id, orderId, productId, productName, quantity, unitPrice</td></tr>
+<tr><td>index</td><td>—</td><td></td></tr>
+</tbody></table>
+<h3>Fragmentos de código (primeras líneas)</h3>
+<h4>Order.js</h4>
+<pre>const { DataTypes } = require('sequelize');
+const { randomInt } = require('crypto');
+
+// Estados del pedido: flujo de trazabilidad completo
+const ORDER_STATUS = ['PENDING', 'VALIDATED', 'APPROVED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+
+module.exports = (sequelize) =&gt; sequelize.define('Order', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  orderNumber: {
+    type: DataTypes.STRING(20),
+    unique: true,
+    field: 'order_number',
+  },
+  customerId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'customer_id',
+  },
+  customerName: {
+    type: DataTypes.STRING(200),
+    field: 'customer_name',
+  },
+  customerEmail: {
+    type: DataTypes.STRING(200),
+    field: 'customer_email',
+  },
+  status: {
+    type: DataTypes.ENUM(...ORDER_STATUS),
+    defaultValue: 'PENDING',
+  },
+  totalAmount: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+    field: 'total_amount',
+  },
+  shippingAddress: {
+    type: DataTypes.TEXT,
+    field: 'shipping_address',
+  },
+  paymentStatus: {
+    type: DataTypes.ENUM('PENDING', 'PAID', 'FAILED', 'REFUNDED'),
+    defaultValue: 'PENDING',
+    field: 'payment_status',
+  },
+  paymentId: {
+    type: DataTypes.STRING(200),
+    field: 'payment_id',
+  },
+  notes: {
+    type: DataTypes.TEXT,
+  },
+}, {
+  tableName: 'orders',
+  timestamps: true,
+  underscored: true,
+  hooks: {
+    beforeCreate: (order) =&gt; {
+      // Genera número de pedido automático
+      if (!order.orderNumber) {
+        const date = new Date();
+        const num = randomInt(1000, 10000);
+        order.orderNumber = `ORD-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}-${num}`;
+      }
+    },
+  },
+});
+</pre>
+<h4>OrderItem.js</h4>
+<pre>const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) =&gt; sequelize.define('OrderItem', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  orderId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'order_id',
+  },
+  productId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'product_id',
+  },
+  productName: {
+    type: DataTypes.STRING(200),
+    field: 'product_name',
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+  },
+  unitPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    field: 'unit_price',
+  },
+  subtotal: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false,
+  },
+}, {
+  tableName: 'order_items',
+  timestamps: true,
+  underscored: true,
+});
+</pre>
+<h4>index.js</h4>
+<pre>const { Sequelize } = require('sequelize');
+
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'ordersdb',
+  process.env.DB_USER || 'smartlogix',
+  process.env.DB_PASSWORD || 'smartlogix123',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false,
+    pool: { max: 10, min: 0, acquire: 30000, idle: 10000 },
+  }
+);
+
+const Order = require('./Order')(sequelize);
+const OrderItem = require('./OrderItem')(sequelize);
+
+// Relaciones
+Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'items' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId', as: 'order' });
+
+module.exports = { sequelize, Order, OrderItem };
+</pre>
+<h3>Relaciones y notas</h3>
+<p>Relaciones: <code>Order.hasMany(OrderItem)</code>, <code>OrderItem.belongsTo(Order)</code>.</p>
+<p>Tablas: <code>orders</code>, <code>order_items</code>.</p>
+<h2>shipping-service</h2>
+<h3>Modelos / Entidades</h3>
+<table><thead><tr><th>Modelo</th><th>Tabla</th><th>Campos principales</th></tr></thead><tbody>
+<tr><td>index</td><td>shipments</td><td>id, orderId, productId, warehouseId, trackingNumber, carrier</td></tr>
+</tbody></table>
+<h3>Fragmentos de código (primeras líneas)</h3>
+<h4>index.js</h4>
+<pre>const { Sequelize, DataTypes } = require('sequelize');
+const { randomInt } = require('crypto');
+
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'shippingdb',
+  process.env.DB_USER || 'smartlogix',
+  process.env.DB_PASSWORD || 'smartlogix123',
+  { host: process.env.DB_HOST || 'localhost', port: process.env.DB_PORT || 5432, dialect: 'postgres', logging: false }
+);
+
+const Shipment = sequelize.define('Shipment', {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  orderId: { type: DataTypes.UUID, allowNull: false, field: 'order_id' },
+  productId: { type: DataTypes.UUID, allowNull: true, field: 'product_id' },
+  warehouseId: { type: DataTypes.UUID, allowNull: true, field: 'warehouse_id' },
+  trackingNumber: { type: DataTypes.STRING(50), unique: true, field: 'tracking_number' },
+  carrier: { type: DataTypes.STRING(100), defaultValue: 'Starken' },
+  status: {
+    type: DataTypes.ENUM('PENDING','PICKED_UP','IN_TRANSIT','OUT_FOR_DELIVERY','DELIVERED','FAILED'),
+    defaultValue: 'PENDING',
+  },
+  originAddress: { type: DataTypes.TEXT, field: 'origin_address' },
+  destinationAddress: { type: DataTypes.TEXT, field: 'destination_address' },
+  estimatedDelivery: { type: DataTypes.DATE, field: 'estimated_delivery' },
+  deliveredAt: { type: DataTypes.DATE, field: 'delivered_at' },
+  weight: { type: DataTypes.DECIMAL(8, 2) },
+  notes: { type: DataTypes.TEXT },
+}, {
+  tableName: 'shipments', timestamps: true, underscored: true,
+  hooks: {
+    beforeCreate: (s) =&gt; {
+      if (!s.trackingNumber) {
+        s.trackingNumber = `SL-${Date.now()}-${randomInt(1000, 10000)}`;
+      }
+    },
+  },
+});
+
+module.exports = { sequelize, Shipment };
+</pre>
+<h3>Relaciones y notas</h3>
+<p>Modelo principal: <code>Shipment</code> con estados y generación automática de <code>trackingNumber</code>.</p>
+<p>Tabla: <code>shipments</code>.</p>
+<h2>Recomendaciones</h2>
+<ul>
+<li>Agregar migraciones con <code>sequelize-cli</code> y scripts para inicializar esquemas en CI/CD.</li>
+<li>Encriptar/ocultar credenciales en variables de entorno o usar secretos del orquestador.</li>
+<li>Agregar índices en campos de búsqueda (ej. <code>sku</code>, <code>order_number</code>, <code>tracking_number</code>).</li>
+<li>Agregar pruebas de integración que validen el mapeo ORM &gt; tablas.</li>
+</ul>
+<h2>Ubicaciones en el repositorio</h2>
+<ul>
+<li>inventory-service: src/models/</li>
+<li>orders-service: src/models/</li>
+<li>shipping-service: src/models/</li>
+</ul>
+</body></html>

@@ -1,0 +1,237 @@
+services:
+  # ─── API GATEWAY (Nginx) ────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: smartlogix-gateway
+    ports:
+      - "8082:80"
+      - "8443:443"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_for_tests_only}
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - frontend
+      - bff-service
+      - inventory-service
+      - orders-service
+      - shipping-service
+      - payment-service
+    networks:
+      - smartlogix-net
+
+  # ─── FRONTEND (React) ───────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartlogix-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+    networks:
+      - smartlogix-net
+
+  # ─── BFF SERVICE ────────────────────────────────────────────────────────────
+  bff-service:
+    build:
+      context: ./bff-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-bff
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - INVENTORY_URL=http://inventory-service:4001
+      - ORDERS_URL=http://orders-service:4002
+      - SHIPPING_URL=http://shipping-service:4003
+      - PAYMENT_URL=http://payment-service:4004
+    networks:
+      - smartlogix-net
+
+  # ─── INVENTORY SERVICE ──────────────────────────────────────────────────────
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-inventory
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - DB_HOST=inventory-db
+      - DB_PORT=5432
+      - DB_NAME=inventorydb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-inventory-db
+    environment:
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+      - ./db-init/inventory.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d inventorydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── ORDERS SERVICE ─────────────────────────────────────────────────────────
+  orders-service:
+    build:
+      context: ./orders-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-orders
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - DB_HOST=orders-db
+      - DB_PORT=5432
+      - DB_NAME=ordersdb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+      - INVENTORY_URL=http://inventory-service:4001
+    depends_on:
+      orders-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  orders-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-orders-db
+    environment:
+      POSTGRES_DB: ordersdb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - orders-data:/var/lib/postgresql/data
+      - ./db-init/orders.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d ordersdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── SHIPPING SERVICE ───────────────────────────────────────────────────────
+  shipping-service:
+    build:
+      context: ./shipping-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-shipping
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - DB_HOST=shipping-db
+      - DB_PORT=5432
+      - DB_NAME=shippingdb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+    depends_on:
+      shipping-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  shipping-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-shipping-db
+    environment:
+      POSTGRES_DB: shippingdb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - shipping-data:/var/lib/postgresql/data
+      - ./db-init/shipping.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d shippingdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── PAYMENT SERVICE ────────────────────────────────────────────────────────
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-payment
+    ports:
+      - "4004:4004"
+    environment:
+      - PORT=4004
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_REPLACE_ME}
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-TEST-REPLACE_ME}
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-stripe}
+    networks:
+      - smartlogix-net
+
+  
+
+  # ─── SONARQUBE (Parcial 3) ──────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:community
+    container_name: smartlogix-sonar
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonarqube
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar123
+    depends_on:
+      sonar-db:
+        condition: service_healthy
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-logs:/opt/sonarqube/logs
+    networks:
+      - smartlogix-net
+
+  sonar-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-sonar-db
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar123
+    volumes:
+      - sonar-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+volumes:
+  inventory-data:
+  orders-data:
+  shipping-data:
+  sonar-data:
+  sonar-logs:
+  sonar-db-data:
+
+networks:
+  smartlogix-net:
+    driver: bridge
