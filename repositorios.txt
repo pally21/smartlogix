@@ -80,3 +80,11 @@ Descripción: Colección de 3 arquetipos Maven que sirven como
              - archetype-microservice-simple: Microservicio REST ligero
 
 ================================================================
+
+REPOSITORIO MICROSERVICIO INVENTARIO
+  URL:         https://github.com/pally21/smartlogix-inventory
+  Descripción: Microservicio de inventario. CRUD productos, bodegas y stock por bodega. PostgreSQL en puerto 5433. Sequelize como ORM.
+
+REPOSITORIO MICROSERVICIO ENVIOS
+  URL:         https://github.com/pally21/smartlogix-shipping
+  Descripción: Microservicio de envíos. Coordinación de despachos, tracking y estados. PostgreSQL en puerto 5435.
