@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de Branching — SmartLogix</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 11.5pt;
+      color: #1e293b;
+      background: #fff;
+      line-height: 1.65;
+    }
+
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 20mm 22mm;
+    }
+
+    /* ── Portada ── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-bottom: 3px solid #16a34a;
+      page-break-after: always;
+      padding: 40mm 20mm;
+    }
+    .cover .logo { font-size: 48pt; font-weight: 900; color: #16a34a; letter-spacing: -2px; }
+    .cover .logo span { color: #0f172a; }
+    .cover h1 { font-size: 20pt; font-weight: 700; margin: 20px 0 10px; color: #0f172a; }
+    .cover .subtitle { font-size: 13pt; color: #64748b; margin-bottom: 30px; }
+    .cover .badge {
+      display: inline-block; background: #dcfce7; color: #15803d;
+      padding: 4px 14px; border-radius: 20px; font-size: 9pt;
+      font-weight: 600; margin: 4px;
+    }
+    .cover .meta { margin-top: 40px; font-size: 10pt; color: #475569; line-height: 2; }
+
+    /* ── Tipografía ── */
+    h1 { font-size: 18pt; color: #15803d; margin: 30px 0 12px; border-bottom: 2px solid #bbf7d0; padding-bottom: 6px; }
+    h2 { font-size: 14pt; color: #16a34a; margin: 24px 0 10px; }
+    h3 { font-size: 11.5pt; color: #15803d; margin: 18px 0 8px; }
+    p  { margin-bottom: 10px; text-align: justify; }
+    code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 9.5pt; }
+
+    .section { margin-bottom: 32px; }
+
+    /* ── Branch pill ── */
+    .branch {
+      display: inline-block;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin: 2px 3px;
+    }
+    .branch.main    { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .branch.develop { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .branch.feature { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+    .branch.release { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+    .branch.hotfix  { background: #fdf4ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+
+    /* ── Diagrama ── */
+    .diagram {
+      background: #0f172a;
+      color: #94a3b8;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      padding: 18px 22px;
+      border-radius: 8px;
+      margin: 16px 0;
+      white-space: pre;
+      line-height: 1.7;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .diagram .main    { color: #f87171; }
+    .diagram .develop { color: #60a5fa; }
+    .diagram .feature { color: #4ade80; }
+    .diagram .release { color: #fb923c; }
+    .diagram .hotfix  { color: #c084fc; }
+    .diagram .tag     { color: #fbbf24; }
+    .diagram .comment { color: #64748b; }
+
+    /* ── Tarjeta de rama ── */
+    .branch-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+    }
+    .branch-card .bc-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .branch-card .bc-name {
+      font-family: 'Courier New', monospace;
+      font-size: 12pt;
+      font-weight: 700;
+    }
+    .branch-card .bc-grid {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 5px 12px;
+      font-size: 10.5pt;
+    }
+    .branch-card .bc-label { font-weight: 600; color: #374151; }
+
+    .bc-main    { border-left: 5px solid #dc2626; }
+    .bc-develop { border-left: 5px solid #2563eb; }
+    .bc-feature { border-left: 5px solid #16a34a; }
+    .bc-release { border-left: 5px solid #ea580c; }
+    .bc-hotfix  { border-left: 5px solid #9333ea; }
+
+    /* ── Tabla ── */
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 10pt; page-break-inside: avoid; }
+    thead tr { background: #15803d; color: #fff; }
+    thead th { padding: 8px 12px; text-align: left; }
+    tbody tr:nth-child(even) { background: #f0fdf4; }
+    tbody td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+
+    /* ── Callout ── */
+    .callout {
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
+      padding: 12px 16px; margin: 14px 0; font-size: 10.5pt; page-break-inside: avoid;
+    }
+    .callout.warn { background: #fffbeb; border-color: #fde68a; }
+    .callout strong { color: #15803d; }
+    .callout.warn strong { color: #b45309; }
+
+    /* ── Steps ── */
+    .steps { counter-reset: step; margin: 14px 0; }
+    .step {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 0 14px;
+      margin-bottom: 12px;
+      align-items: start;
+      page-break-inside: avoid;
+    }
+    .step::before {
+      content: counter(step);
+      background: #16a34a;
+      color: #fff;
+      font-weight: 700;
+      font-size: 10pt;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-content { padding-top: 4px; font-size: 10.5pt; }
+    .step-content strong { display: block; margin-bottom: 2px; }
+
+    @media print {
+      body { font-size: 10.5pt; }
+      .page { padding: 15mm 18mm; }
+      .cover { min-height: auto; padding: 30mm 15mm; }
+      .no-print { display: none; }
+    }
+    @page { margin: 0; size: A4; }
+  </style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="page cover">
+  <div class="logo">Smart<span>Logix</span></div>
+  <h1>Plan de Branching</h1>
+  <p class="subtitle">Estrategia de ramas Git para el equipo de desarrollo</p>
+  <div>
+    <span class="badge">GitFlow</span>
+    <span class="badge">Feature Branching</span>
+    <span class="badge">Pull Requests</span>
+    <span class="badge">Semantic Versioning</span>
+  </div>
+  <div class="meta">
+    <div><strong>Institución:</strong> Duoc UC</div>
+    <div><strong>Fecha:</strong> Abril 2026</div>
+    <div><strong>Versión:</strong> 1.0.0</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- 1. INTRODUCCIÓN -->
+  <div class="section">
+    <h1>1. Introducción</h1>
+    <p>
+      Este documento describe la estrategia de branching adoptada por el equipo de SmartLogix
+      para organizar el trabajo en paralelo, controlar las versiones del software y garantizar
+      que el código en producción siempre sea estable.
+    </p>
+    <p>
+      La estrategia elegida es <strong>GitFlow adaptado</strong>, basada en el modelo propuesto por
+      Vincent Driessen (2010), con ajustes para equipos pequeños que trabajan en sprints cortos.
+      Combina ramas de larga duración (<code>main</code>, <code>develop</code>) con ramas
+      de corta duración (<code>feature</code>, <code>release</code>, <code>hotfix</code>).
+    </p>
+
+    <div class="callout">
+      <strong>Principio guía:</strong> La rama <code>main</code> solo contiene código que ya fue
+      probado y aprobado. Nadie hace push directo a <code>main</code> ni a <code>develop</code>.
+    </div>
+  </div>
+
+  <!-- 2. DIAGRAMA GENERAL -->
+  <div class="section">
+    <h1>2. Diagrama General de Ramas</h1>
+
+    <div class="diagram"><span class="comment">  tiempo →</span>
+
+<span class="main">main     ●────────────────────────────●────────────────────●
+         v1.0.0          ↑               v1.1.0  ↑       v1.1.1</span>
+                         │                        │
+<span class="release">release  ────────────────●───────────●            ●─────●
+         v1.1.0-rc  ────┘   (QA)    └──→main     hotfix └──→main</span>
+                   ↑                                ↑
+<span class="develop">develop  ●────────●────●────────────────────────────────●────●──→
+         │        ↑   ↑                                   ↑   ↑</span>
+         │        │   │                                   │   │
+<span class="feature">feat/inv─●──────→─┘   │                                   │   │
+feat/ord──────────●──→┘                                   │   │
+feat/pay──────────────────────────────────────────────●──→┘   │
+feat/ship──────────────────────────────────────────────────●──→┘</span></div>
+
+    <p>
+      Cada desarrollador trabaja en su propia rama <code>feature</code>.
+      Al terminar, abre un Pull Request hacia <code>develop</code>.
+      Cuando se acumula un conjunto de features probadas, se crea una rama <code>release</code>
+      para QA final antes de fusionar con <code>main</code>.
+    </p>
+  </div>
+
+  <!-- 3. TIPOS DE RAMAS -->
+  <div class="section">
+    <h1>3. Tipos de Ramas</h1>
+
+    <div class="branch-card bc-main">
+      <div class="bc-header">
+        <span class="branch main">main</span>
+        <span style="font-size:9pt;color:#6b7280;">Rama permanente — Producción</span>
+      </div>
+      <div class="bc-grid">
+        <span class="bc-label">Propósito:</span><span>Contiene el código que está o estuvo en producción. Cada commit representa una versión liberada.</span>
+        <span class="bc-label">Protegida:</span><span>Sí. Solo acepta merges desde <code>release/*</code> y <code>hotfix/*</code> mediante PR aprobado.</span>
+        <span class="bc-label">Etiquetas:</span><span>Cada merge lleva un tag de versión semántica: <code>v1.0.0</code>, <code>v1.1.0</code>, etc.</span>
+        <span class="bc-label">Push directo:</span><span>Prohibido para todos los integrantes.</span>
+      </div>
+    </div>
+
+    <div class="branch-card bc-develop">
+      <div class="bc-header">
+        <span class="branch develop">develop</span>
+        <span style="font-size:9pt;color:#6b7280;">Rama permanente — Integración</span>
+      </div>
+      <div class="bc-grid">
+        <span class="bc-label">Propósito:</span><span>Base de integración donde se acumulan las features terminadas. Representa el estado del próximo release.</span>
+        <span class="bc-label">Protegida:</span><span>Sí. Solo acepta merges desde <code>feature/*</code> mediante PR con al menos 1 aprobación.</span>
+        <span class="bc-label">Tests:</span><span>Se ejecutan automáticamente al recibir un PR (CI/CD).</span>
+        <span class="bc-label">Push directo:</span><span>Prohibido.</span>
+      </div>
+    </div>
+
+    <div class="branch-card bc-feature">
+      <div class="bc-header">
+        <span class="branch feature">feature/nombre-corto</span>
+        <span style="font-size:9pt;color:#6b7280;">Rama temporal — Desarrollo de funcionalidad</span>
+      </div>
+      <div class="bc-grid">
+        <span class="bc-label">Propósito:</span><span>Desarrollo de una nueva funcionalidad o mejora. Una rama por tarea o ticket.</span>
+        <span class="bc-label">Origen:</span><span>Se crea desde <code>develop</code>.</span>
+        <span class="bc-label">Destino:</span><span>Se fusiona hacia <code>develop</code> mediante PR.</span>
+        <span class="bc-label">Duración:</span><span>Corta. Máximo la duración del sprint (1-2 semanas).</span>
+        <span class="bc-label">Ejemplos:</span>
+        <span>
+          <code>feature/inventory-stock-alert</code><br>
+          <code>feature/orders-payment-confirm</code><br>
+          <code>feature/shipping-tracking-ui</code>
+        </span>
+      </div>
+    </div>
+
+    <div class="branch-card bc-release">
+      <div class="bc-header">
+        <span class="branch release">release/v1.x.0</span>
+        <span style="font-size:9pt;color:#6b7280;">Rama temporal — Preparación de versión</span>
+      </div>
+      <div class="bc-grid">
+        <span class="bc-label">Propósito:</span><span>Estabilizar el código antes de liberar. Solo se permiten bugfixes menores y ajustes de versión.</span>
+        <span class="bc-label">Origen:</span><span>Se crea desde <code>develop</code>.</span>
+        <span class="bc-label">Destino:</span><span>Se fusiona hacia <code>main</code> Y hacia <code>develop</code> (para sincronizar los fixes).</span>
+        <span class="bc-label">Ejemplos:</span><span><code>release/v1.1.0</code>, <code>release/v1.2.0</code></span>
+      </div>
+    </div>
+
+    <div class="branch-card bc-hotfix">
+      <div class="bc-header">
+        <span class="branch hotfix">hotfix/descripcion</span>
+        <span style="font-size:9pt;color:#6b7280;">Rama temporal — Corrección urgente en producción</span>
+      </div>
+      <div class="bc-grid">
+        <span class="bc-label">Propósito:</span><span>Corregir un bug crítico en producción sin esperar el próximo ciclo de release.</span>
+        <span class="bc-label">Origen:</span><span>Se crea desde <code>main</code>.</span>
+        <span class="bc-label">Destino:</span><span>Se fusiona hacia <code>main</code> Y hacia <code>develop</code>.</span>
+        <span class="bc-label">Ejemplos:</span><span><code>hotfix/gateway-502-dns</code>, <code>hotfix/payment-timeout</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CONVENCIÓN DE NOMBRES -->
+  <div class="section">
+    <h1>4. Convención de Nombres</h1>
+    <table>
+      <thead>
+        <tr><th>Tipo</th><th>Formato</th><th>Ejemplo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="branch main">main</span></td><td><code>main</code></td><td><code>main</code></td></tr>
+        <tr><td><span class="branch develop">develop</span></td><td><code>develop</code></td><td><code>develop</code></td></tr>
+        <tr><td><span class="branch feature">feature</span></td><td><code>feature/servicio-descripcion</code></td><td><code>feature/inventory-low-stock-alert</code></td></tr>
+        <tr><td><span class="branch release">release</span></td><td><code>release/vMAJOR.MINOR.0</code></td><td><code>release/v1.2.0</code></td></tr>
+        <tr><td><span class="branch hotfix">hotfix</span></td><td><code>hotfix/descripcion-corta</code></td><td><code>hotfix/bff-cors-error</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Reglas de nomenclatura:</strong> Usar solo minúsculas, guiones medios como separador,
+      sin espacios ni caracteres especiales. El nombre debe describir la funcionalidad, no el número de ticket.
+    </div>
+  </div>
+
+  <!-- 5. FLUJO DE TRABAJO -->
+  <div class="section">
+    <h1>5. Flujo de Trabajo Detallado</h1>
+
+    <h2>5.1 Desarrollar una nueva funcionalidad</h2>
+    <div class="steps">
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Crear la rama desde develop</strong>
+          <code>git checkout develop && git pull origin develop</code><br>
+          <code>git checkout -b feature/inventory-warehouse-delete</code>
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Desarrollar y hacer commits frecuentes</strong>
+          <code>git add src/controllers/inventoryController.js</code><br>
+          <code>git commit -m "feat(inventory): add warehouse delete endpoint"</code>
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Subir la rama al repositorio remoto</strong>
+          <code>git push origin feature/inventory-warehouse-delete</code>
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Abrir Pull Request hacia develop en GitHub</strong>
+          Descripción del PR: qué hace, cómo probarlo, capturas si es UI.
+          Asignar al menos 1 revisor del equipo.
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Revisión de código y aprobación</strong>
+          El revisor aprueba o solicita cambios. Se resuelven los comentarios.
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Merge con Squash hacia develop</strong>
+          Se usa <em>Squash and merge</em> para mantener el historial de <code>develop</code> limpio.
+          Se elimina la rama feature después del merge.
+        </div>
+      </div>
+    </div>
+
+    <h2>5.2 Crear un Release</h2>
+    <div class="steps">
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Crear rama release desde develop</strong>
+          <code>git checkout -b release/v1.1.0 develop</code>
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Actualizar versión en package.json de cada servicio</strong>
+          <code>npm version minor --no-git-tag-version</code> (en cada servicio)
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Pruebas de regresión y correcciones menores</strong>
+          Solo bugfixes. No se agregan features nuevas en esta rama.
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Merge hacia main y etiqueta</strong>
+          <code>git checkout main && git merge --no-ff release/v1.1.0</code><br>
+          <code>git tag -a v1.1.0 -m "Release v1.1.0"</code>
+        </div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step-content">
+          <strong>Sincronizar develop con los fixes del release</strong>
+          <code>git checkout develop && git merge --no-ff release/v1.1.0</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CONVENCIÓN DE COMMITS -->
+  <div class="section">
+    <h1>6. Convención de Commits</h1>
+    <p>
+      Se utiliza <strong>Conventional Commits</strong> para mantener un historial legible y
+      poder generar changelogs automáticos.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Prefijo</th><th>Cuándo usarlo</th><th>Ejemplo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>feat:</code></td><td>Nueva funcionalidad</td><td><code>feat(orders): add payment confirmation flow</code></td></tr>
+        <tr><td><code>fix:</code></td><td>Corrección de bug</td><td><code>fix(gateway): resolve DNS cache on container restart</code></td></tr>
+        <tr><td><code>docs:</code></td><td>Solo documentación</td><td><code>docs(readme): add Docker setup instructions</code></td></tr>
+        <tr><td><code>refactor:</code></td><td>Refactorización sin cambio funcional</td><td><code>refactor(inventory): extract stock logic to repository</code></td></tr>
+        <tr><td><code>test:</code></td><td>Agregar o modificar tests</td><td><code>test(bff): add integration test for products endpoint</code></td></tr>
+        <tr><td><code>chore:</code></td><td>Tareas de mantenimiento</td><td><code>chore: update dependencies to latest minor</code></td></tr>
+        <tr><td><code>ci:</code></td><td>Cambios en CI/CD</td><td><code>ci: add SonarQube quality gate step</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Formato completo:</strong> <code>tipo(scope): descripción en imperativo, minúscula, sin punto final</code><br>
+      El <em>scope</em> es opcional pero recomendado: indica el servicio o módulo afectado.
+    </div>
+  </div>
+
+  <!-- 7. REGLAS DE PROTECCIÓN -->
+  <div class="section">
+    <h1>7. Reglas de Protección en GitHub</h1>
+
+    <table>
+      <thead>
+        <tr><th>Regla</th><th>main</th><th>develop</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Requiere Pull Request</td><td>✅ Sí</td><td>✅ Sí</td></tr>
+        <tr><td>Aprobaciones requeridas</td><td>2 aprobaciones</td><td>1 aprobación</td></tr>
+        <tr><td>Tests de CI deben pasar</td><td>✅ Sí</td><td>✅ Sí</td></tr>
+        <tr><td>Push directo permitido</td><td>❌ No</td><td>❌ No</td></tr>
+        <tr><td>Force push permitido</td><td>❌ No</td><td>❌ No</td></tr>
+        <tr><td>Eliminar rama permitido</td><td>❌ No</td><td>❌ No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 8. REPOSITORIOS -->
+  <div class="section">
+    <h1>8. Estructura de Repositorios</h1>
+    <p>
+      SmartLogix utiliza una estrategia de <strong>multi-repositorio</strong>: cada componente tiene
+      su propio repositorio en GitHub, permitiendo que cada equipo despliegue de forma independiente.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Repositorio</th><th>Componente</th><th>Rama principal</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>smartlogix-frontend</code></td><td>React + Vite</td><td>main</td></tr>
+        <tr><td><code>smartlogix-bff</code></td><td>BFF Node.js</td><td>main</td></tr>
+        <tr><td><code>smartlogix-inventory</code></td><td>Microservicio inventario</td><td>main</td></tr>
+        <tr><td><code>smartlogix-orders</code></td><td>Microservicio pedidos</td><td>main</td></tr>
+        <tr><td><code>smartlogix-shipping</code></td><td>Microservicio envíos</td><td>main</td></tr>
+        <tr><td><code>smartlogix-payment</code></td><td>Microservicio pagos</td><td>main</td></tr>
+        <tr><td><code>smartlogix-archetypes</code></td><td>Arquetipos Maven</td><td>main</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Repositorio principal:</strong> Existe un repositorio raíz <code>smartlogix</code>
+      que contiene el <code>docker-compose.yml</code> y la documentación general del proyecto.
+      Todos los repositorios de servicios son submódulos Git de este repositorio raíz.
+    </div>
+  </div>
+
+  <!-- 9. RESUMEN -->
+  <div class="section">
+    <h1>9. Resumen de la Estrategia</h1>
+    <table>
+      <thead>
+        <tr><th>Aspecto</th><th>Decisión</th><th>Justificación</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Modelo base</td><td>GitFlow adaptado</td><td>Separa claramente desarrollo, QA y producción</td></tr>
+        <tr><td>Ramas permanentes</td><td>main + develop</td><td>develop como buffer entre features y producción</td></tr>
+        <tr><td>Ramas temporales</td><td>feature, release, hotfix</td><td>Ciclo de vida claro: se crean y eliminan</td></tr>
+        <tr><td>Integración</td><td>Pull Requests obligatorios</td><td>Revisión de código entre pares, trazabilidad</td></tr>
+        <tr><td>Merge strategy</td><td>Squash hacia develop, No-FF hacia main</td><td>Historial limpio en develop, trazable en main</td></tr>
+        <tr><td>Commits</td><td>Conventional Commits</td><td>Changelogs automáticos, historial legible</td></tr>
+        <tr><td>Versiones</td><td>Semantic Versioning (semver)</td><td>MAJOR.MINOR.PATCH con tags en main</td></tr>
+        <tr><td>Repositorios</td><td>Multi-repo</td><td>Despliegues independientes por servicio</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Conclusión:</strong> La estrategia GitFlow adaptada permite al equipo de SmartLogix
+      trabajar en paralelo sobre distintos microservicios sin interferencias, garantizando que
+      <code>main</code> siempre refleje un sistema estable y listo para producción.
+      La combinación de Pull Requests, Conventional Commits y Semantic Versioning otorga
+      trazabilidad completa del historial de cambios.
+    </div>
+  </div>
+
+</div>
+
+<div class="no-print" style="background:#fef3c7;border:1px solid #f59e0b;padding:12px 20px;text-align:center;font-size:10pt;">
+  <strong>Para exportar a PDF:</strong> Cmd+P → Destino: "Guardar como PDF" → Tamaño A4 → Sin márgenes → Guardar
+</div>
+
+</body>
+</html>

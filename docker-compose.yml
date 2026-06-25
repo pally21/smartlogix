@@ -1,0 +1,194 @@
+services:
+  # ─── API GATEWAY (Nginx) ────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: smartlogix-gateway
+    ports:
+      - "8082:80"
+    depends_on:
+      - bff-service
+      - frontend
+    networks:
+      - smartlogix-net
+
+  # ─── FRONTEND (React) ───────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8082/api
+    container_name: smartlogix-frontend
+    ports:
+      - "3001:3000"
+    networks:
+      - smartlogix-net
+
+  # ─── BFF SERVICE ────────────────────────────────────────────────────────────
+  bff-service:
+    build:
+      context: ./bff-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-bff
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - INVENTORY_URL=http://inventory-service:4001
+      - ORDERS_URL=http://orders-service:4002
+      - SHIPPING_URL=http://shipping-service:4003
+      - PAYMENT_URL=http://payment-service:4004
+      - JWT_SECRET=dev_secret_for_tests_only
+      - JWT_MANDATORY=0
+    depends_on:
+      - inventory-service
+      - orders-service
+      - shipping-service
+      - payment-service
+    networks:
+      - smartlogix-net
+
+  # ─── INVENTORY SERVICE ──────────────────────────────────────────────────────
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-inventory
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - DB_HOST=inventory-db
+      - DB_PORT=5432
+      - DB_NAME=inventorydb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-inventory-db
+    environment:
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+      - ./db-init/inventory.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d inventorydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── ORDERS SERVICE ─────────────────────────────────────────────────────────
+  orders-service:
+    build:
+      context: ./orders-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-orders
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - DB_HOST=orders-db
+      - DB_PORT=5432
+      - DB_NAME=ordersdb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+      - INVENTORY_URL=http://inventory-service:4001
+    depends_on:
+      orders-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  orders-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-orders-db
+    environment:
+      POSTGRES_DB: ordersdb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - orders-data:/var/lib/postgresql/data
+      - ./db-init/orders.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d ordersdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── SHIPPING SERVICE ───────────────────────────────────────────────────────
+  shipping-service:
+    build:
+      context: ./shipping-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-shipping
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - DB_HOST=shipping-db
+      - DB_PORT=5432
+      - DB_NAME=shippingdb
+      - DB_USER=smartlogix
+      - DB_PASSWORD=smartlogix123
+    depends_on:
+      shipping-db:
+        condition: service_healthy
+    networks:
+      - smartlogix-net
+
+  shipping-db:
+    image: postgres:15-alpine
+    container_name: smartlogix-shipping-db
+    environment:
+      POSTGRES_DB: shippingdb
+      POSTGRES_USER: smartlogix
+      POSTGRES_PASSWORD: smartlogix123
+    volumes:
+      - shipping-data:/var/lib/postgresql/data
+      - ./db-init/shipping.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlogix -d shippingdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartlogix-net
+
+  # ─── PAYMENT SERVICE ────────────────────────────────────────────────────────
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: smartlogix-payment
+    ports:
+      - "4004:4004"
+    environment:
+      - PORT=4004
+      - PAYMENT_PROVIDER=sandbox
+      - STRIPE_SECRET_KEY=sk_test_REPLACE_ME
+      - MERCADOPAGO_ACCESS_TOKEN=TEST-REPLACE_ME
+    networks:
+      - smartlogix-net
+
+volumes:
+  inventory-data:
+  orders-data:
+  shipping-data:
+
+networks:
+  smartlogix-net:
+    driver: bridge

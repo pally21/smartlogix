@@ -1,0 +1,42 @@
+digraph G {
+  rankdir=LR;
+  node [shape=rect, style=filled, fillcolor="#f0f0f8", fontname="Helvetica"];
+
+  Frontend [label="Frontend (React)\nStatic assets / SPA", shape=component, fillcolor="#cfe8ff"];
+  Nginx [label="Nginx (frontend)\nReverse proxy / static"];
+  BFF [label="BFF Service\nExpress + orchestration", shape=component, fillcolor="#ffd9b3"];
+
+  subgraph cluster_services {
+    label = "Microservicios";
+    style = rounded;
+    color = "#bbbbff";
+    Inventory [label="Inventory Service\nProducts, Stock, Warehouses", fillcolor="#e6ffe6"];
+    Orders [label="Orders Service\nOrder lifecycle", fillcolor="#e6ffe6"];
+    Shipping [label="Shipping Service\nTracking & status", fillcolor="#e6ffe6"];
+    Payment [label="Payment Service\nIntents, webhooks", fillcolor="#e6ffe6"];
+  }
+
+  Database [label="Postgres / Persistencia\nJPA / Sequelize / SQL", shape=cylinder, fillcolor="#fff2cc"];
+  MessageQueue [label="(opcional) RabbitMQ / Kafka\nEventos asíncronos", shape=oval, fillcolor="#f2e6ff"];
+
+  Frontend -> Nginx [label="HTTP(S)", color="#333333"];
+  Nginx -> BFF [label="HTTP(S) / API", color="#333333"];
+
+  BFF -> Inventory [label="REST calls (internal)", style=solid];
+  BFF -> Orders [label="REST calls", style=solid];
+  BFF -> Shipping [label="REST calls", style=solid];
+  BFF -> Payment [label="REST calls / webhooks", style=solid];
+
+  Inventory -> Database [label="SELECT/INSERT/UPDATE", style=dashed];
+  Orders -> Database [label="JPA/SQL / persistence", style=dashed];
+  Shipping -> Database [label="persist shipment", style=dashed];
+  Payment -> Database [label="payments records", style=dashed];
+
+  Orders -> MessageQueue [label="order events", style=dotted];
+  Shipping -> MessageQueue [label="shipment events", style=dotted];
+
+  // Visual grouping
+  { rank = same; Nginx; Frontend }
+  { rank = same; Inventory; Orders; Shipping; Payment }
+
+}

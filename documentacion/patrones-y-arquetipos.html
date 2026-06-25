@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis de Patrones y Arquetipos — SmartLogix</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 11.5pt;
+      color: #1e293b;
+      background: #fff;
+      line-height: 1.65;
+    }
+
+    /* ── Layout de página ── */
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 20mm 22mm;
+    }
+
+    /* ── Portada ── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-bottom: 3px solid #2563eb;
+      page-break-after: always;
+      padding: 40mm 20mm;
+    }
+    .cover .logo {
+      font-size: 48pt;
+      font-weight: 900;
+      color: #2563eb;
+      letter-spacing: -2px;
+    }
+    .cover .logo span { color: #0f172a; }
+    .cover h1 {
+      font-size: 20pt;
+      font-weight: 700;
+      margin: 20px 0 10px;
+      color: #0f172a;
+    }
+    .cover .subtitle {
+      font-size: 13pt;
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+    .cover .meta {
+      margin-top: 40px;
+      font-size: 10pt;
+      color: #475569;
+      line-height: 2;
+    }
+    .cover .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin: 4px 4px;
+    }
+
+    /* ── Tipografía ── */
+    h1 { font-size: 18pt; color: #1e40af; margin: 30px 0 12px; border-bottom: 2px solid #bfdbfe; padding-bottom: 6px; }
+    h2 { font-size: 14pt; color: #1d4ed8; margin: 24px 0 10px; }
+    h3 { font-size: 11.5pt; color: #1e40af; margin: 18px 0 8px; }
+    p  { margin-bottom: 10px; text-align: justify; }
+
+    /* ── Secciones ── */
+    .section { margin-bottom: 32px; }
+
+    /* ── Tarjeta de patrón ── */
+    .pattern-card {
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #2563eb;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      background: #f8fafc;
+      page-break-inside: avoid;
+    }
+    .pattern-card.green  { border-left-color: #16a34a; }
+    .pattern-card.purple { border-left-color: #7c3aed; }
+    .pattern-card.orange { border-left-color: #ea580c; }
+    .pattern-card.teal   { border-left-color: #0d9488; }
+    .pattern-card.rose   { border-left-color: #e11d48; }
+
+    .pattern-card .pattern-title {
+      font-size: 12pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .pattern-card .pattern-type {
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .pattern-card .pattern-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 4px 12px;
+      font-size: 10.5pt;
+      margin-bottom: 4px;
+    }
+    .pattern-card .label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    /* ── Tabla ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+    thead tr { background: #1e40af; color: #fff; }
+    thead th { padding: 8px 12px; text-align: left; }
+    tbody tr:nth-child(even) { background: #f1f5f9; }
+    tbody td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; }
+
+    /* ── Diagrama ASCII ── */
+    .diagram {
+      background: #0f172a;
+      color: #94a3b8;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      white-space: pre;
+      line-height: 1.5;
+      page-break-inside: avoid;
+    }
+    .diagram .hl  { color: #38bdf8; }
+    .diagram .gr  { color: #4ade80; }
+    .diagram .ye  { color: #fbbf24; }
+
+    /* ── Callout ── */
+    .callout {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: 10.5pt;
+      page-break-inside: avoid;
+    }
+    .callout strong { color: #1d4ed8; }
+
+    /* ── Print ── */
+    @media print {
+      body { font-size: 10.5pt; }
+      .page { padding: 15mm 18mm; }
+      .cover { min-height: auto; padding: 30mm 15mm; }
+      .no-print { display: none; }
+    }
+    @page { margin: 0; size: A4; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     PORTADA
+════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="logo">Smart<span>Logix</span></div>
+  <h1>Análisis de Patrones de Diseño y Arquetipos</h1>
+  <p class="subtitle">Evaluación Parcial N°2 — Experiencia de Aprendizaje</p>
+
+  <div>
+    <span class="badge">Patrones de Diseño</span>
+    <span class="badge">Arquetipos Maven</span>
+    <span class="badge">Arquitectura Microservicios</span>
+    <span class="badge">BFF</span>
+  </div>
+
+  <div class="meta">
+    <div><strong>Institución:</strong> Duoc UC</div>
+    <div><strong>Fecha:</strong> Abril 2026</div>
+    <div><strong>Versión:</strong> 1.0.0</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CONTENIDO
+════════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- 1. INTRODUCCIÓN -->
+  <div class="section">
+    <h1>1. Introducción</h1>
+    <p>
+      SmartLogix es un sistema de gestión logística desarrollado con una arquitectura de microservicios.
+      El sistema está compuesto por un frontend React, un Backend For Frontend (BFF) y cuatro microservicios
+      independientes: inventario, pedidos, envíos y pagos.
+    </p>
+    <p>
+      Este documento describe los patrones de diseño y arquetipos seleccionados para su implementación,
+      justificando cada elección en función de los requerimientos funcionales y no funcionales del sistema.
+    </p>
+
+    <div class="callout">
+      <strong>Objetivo:</strong> Demostrar cómo los patrones de diseño y los arquetipos Maven contribuyen
+      a una arquitectura modular, mantenible y escalable para SmartLogix.
+    </div>
+  </div>
+
+  <!-- 2. ARQUITECTURA GENERAL -->
+  <div class="section">
+    <h1>2. Arquitectura General del Sistema</h1>
+    <p>
+      SmartLogix implementa el patrón arquitectónico de <strong>Microservicios</strong> con un
+      <strong>API Gateway</strong> centralizado y un <strong>Backend For Frontend</strong> que agrega
+      y transforma las respuestas para el cliente web.
+    </p>
+
+    <div class="diagram"><span class="hl">┌─────────────────────────────────────────────────────────┐
+│                    CLIENTE (Browser)                     │
+│                React 18 + Vite — Puerto 3001             │
+└─────────────────────┬───────────────────────────────────┘</span>
+                      │ HTTP
+<span class="ye">┌─────────────────────▼───────────────────────────────────┐
+│               API GATEWAY (nginx)                        │
+│                    Puerto 8080                           │
+└──────────────────────┬──────────────────────────────────┘</span>
+                       │ /api/*
+<span class="gr">┌──────────────────────▼──────────────────────────────────┐
+│              BFF SERVICE (Node.js)                       │
+│                    Puerto 4000                           │
+│         Agrega y transforma respuestas                   │
+└───┬──────────┬──────────┬──────────┬───────────────────┘</span>
+    │          │          │          │
+<span class="hl">┌───▼──┐  ┌───▼──┐  ┌───▼──┐  ┌───▼──┐
+│ INV  │  │ORD   │  │SHIP  │  │ PAY  │
+│:4001 │  │:4002 │  │:4003 │  │:4004 │
+└──┬───┘  └──┬───┘  └──┬───┘  └──────┘
+   │         │          │
+┌──▼──┐  ┌──▼──┐  ┌───▼──┐
+│ DB  │  │ DB  │  │  DB  │
+│ INV │  │ORD  │  │ SHIP │
+└─────┘  └─────┘  └──────┘</span></div>
+
+    <table>
+      <thead>
+        <tr><th>Componente</th><th>Tecnología</th><th>Puerto</th><th>Responsabilidad</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Frontend</td><td>React 18 + Vite</td><td>3001</td><td>Interfaz de usuario</td></tr>
+        <tr><td>API Gateway</td><td>nginx</td><td>8080</td><td>Enrutamiento y rate limiting</td></tr>
+        <tr><td>BFF Service</td><td>Node.js + Express</td><td>4000</td><td>Agregación para el frontend</td></tr>
+        <tr><td>Inventory Service</td><td>Node.js + PostgreSQL</td><td>4001</td><td>Productos y stock</td></tr>
+        <tr><td>Orders Service</td><td>Node.js + PostgreSQL</td><td>4002</td><td>Pedidos y estados</td></tr>
+        <tr><td>Shipping Service</td><td>Node.js + PostgreSQL</td><td>4003</td><td>Envíos y tracking</td></tr>
+        <tr><td>Payment Service</td><td>Node.js + Stripe/MP</td><td>4004</td><td>Procesamiento de pagos</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. PATRONES ARQUITECTÓNICOS -->
+  <div class="section">
+    <h1>3. Patrones Arquitectónicos</h1>
+
+    <div class="pattern-card">
+      <div class="pattern-title">Microservicios</div>
+      <div class="pattern-type">Patrón Arquitectónico</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>El sistema se divide en servicios independientes, cada uno con su propia base de datos y ciclo de despliegue.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span>inventory-service, orders-service, shipping-service, payment-service.</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>Permite escalar cada servicio de forma independiente. El servicio de inventario puede tener más réplicas que el de pagos sin afectar al resto.</span></div>
+      <div class="pattern-row"><span class="label">Beneficio:</span><span>Desacoplamiento, tolerancia a fallos parciales, despliegues independientes.</span></div>
+    </div>
+
+    <div class="pattern-card green">
+      <div class="pattern-title">Backend For Frontend (BFF)</div>
+      <div class="pattern-type">Patrón Arquitectónico</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Capa intermedia entre el cliente web y los microservicios, que adapta y agrega datos específicamente para la interfaz.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span>bff-service (Puerto 4000).</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>El frontend necesita datos de múltiples servicios en una sola pantalla (ej. dashboard combina KPIs de inventario, pedidos y envíos). Sin BFF, el cliente haría N llamadas paralelas aumentando la complejidad.</span></div>
+      <div class="pattern-row"><span class="label">Beneficio:</span><span>Reduce el acoplamiento del frontend con los microservicios, permite evolucionar la API sin romper el cliente.</span></div>
+    </div>
+
+    <div class="pattern-card purple">
+      <div class="pattern-title">API Gateway</div>
+      <div class="pattern-type">Patrón Arquitectónico</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Punto único de entrada al sistema que maneja enrutamiento, CORS, rate limiting y TLS.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span>nginx (Puerto 8080).</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>Evita exponer directamente los puertos internos de cada microservicio. Centraliza políticas de seguridad y logging.</span></div>
+      <div class="pattern-row"><span class="label">Beneficio:</span><span>Seguridad centralizada, rate limiting de 30 req/s, registro de todas las solicitudes.</span></div>
+    </div>
+  </div>
+
+  <!-- 4. PATRONES DE DISEÑO -->
+  <div class="section">
+    <h1>4. Patrones de Diseño</h1>
+
+    <h2>4.1 Patrones Creacionales</h2>
+
+    <div class="pattern-card orange">
+      <div class="pattern-title">Factory Method</div>
+      <div class="pattern-type">Patrón Creacional (GoF)</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Define una interfaz para crear objetos, pero delega en subclases la decisión de qué clase instanciar.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span><code>inventory-service/src/factories/productFactory.js</code></span></div>
+      <div class="pattern-row"><span class="label">Aplicación:</span><span>La fábrica genera productos según su tipo (físico, digital, perecedero), asignando automáticamente el SKU con prefijo correspondiente (PHY-, DIG-, PER-) y validando las reglas de negocio de cada tipo.</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>Sin este patrón, la lógica de creación estaría dispersa en el controlador, dificultando agregar nuevos tipos de producto en el futuro.</span></div>
+    </div>
+
+    <h2>4.2 Patrones Estructurales</h2>
+
+    <div class="pattern-card teal">
+      <div class="pattern-title">Repository Pattern</div>
+      <div class="pattern-type">Patrón Estructural / Acceso a Datos</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Abstrae el acceso a la capa de persistencia, separando la lógica de negocio de las consultas a la base de datos.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span><code>inventory-service/src/repositories/inventoryRepository.js</code><br><code>orders-service/src/repositories/</code><br><code>shipping-service/src/repositories/</code></span></div>
+      <div class="pattern-row"><span class="label">Aplicación:</span><span>Los controladores no acceden directamente a los modelos Sequelize. Toda interacción con la base de datos pasa por el repositorio correspondiente.</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>Facilita el testing (se puede reemplazar el repositorio por un mock), y permite cambiar el ORM sin tocar los controladores.</span></div>
+    </div>
+
+    <h2>4.3 Patrones de Comportamiento</h2>
+
+    <div class="pattern-card rose">
+      <div class="pattern-title">Circuit Breaker</div>
+      <div class="pattern-type">Patrón de Comportamiento / Resiliencia</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Detecta fallos repetidos en llamadas a servicios externos y "abre el circuito" para evitar cascada de errores.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span><code>inventory-service/src/middleware/circuitBreaker.js</code></span></div>
+      <div class="pattern-row"><span class="label">Aplicación:</span><span>Si un microservicio dependiente no responde en el tiempo configurado, el Circuit Breaker retorna un error controlado inmediatamente en lugar de esperar un timeout largo.</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>En una arquitectura de microservicios, un servicio caído no debe bloquear todo el sistema. Este patrón garantiza resiliencia y tiempo de respuesta predecible.</span></div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title">Interceptor (Axios)</div>
+      <div class="pattern-type">Patrón de Comportamiento</div>
+      <div class="pattern-row"><span class="label">Descripción:</span><span>Intercepta solicitudes y respuestas HTTP para aplicar transformaciones transversales.</span></div>
+      <div class="pattern-row"><span class="label">Dónde:</span><span><code>frontend/src/services/api.js</code></span></div>
+      <div class="pattern-row"><span class="label">Aplicación:</span><span>El interceptor de respuesta desenvuelve automáticamente el objeto <code>res.data</code>, extrae mensajes de error de validación y rechaza la promesa con un mensaje legible.</span></div>
+      <div class="pattern-row"><span class="label">Justificación:</span><span>Evita duplicar el manejo de errores en cada llamada API del frontend. Un solo lugar centraliza la transformación de respuestas.</span></div>
+    </div>
+  </div>
+
+  <!-- 5. ARQUETIPOS MAVEN -->
+  <div class="section">
+    <h1>5. Arquetipos Maven</h1>
+    <p>
+      Los arquetipos Maven son plantillas de proyecto que permiten generar estructuras base estandarizadas
+      con un único comando. Para SmartLogix se diseñaron tres arquetipos que reflejan los distintos
+      tipos de componentes backend del sistema.
+    </p>
+
+    <h2>5.1 archetype-bff</h2>
+    <div class="pattern-card green">
+      <div class="pattern-title">Arquetipo: Backend For Frontend</div>
+      <div class="pattern-type">Spring Boot 3 + WebFlux + Actuator</div>
+      <div class="pattern-row"><span class="label">Genera:</span><span>Aplicación Spring Boot con BffController y cliente WebFlux para llamar microservicios.</span></div>
+      <div class="pattern-row"><span class="label">Parámetros:</span><span><code>serviceName</code>, <code>servicePort</code></span></div>
+      <div class="pattern-row"><span class="label">Uso típico:</span><span>Crear un BFF Java cuando el equipo migra de Node.js a Spring Boot.</span></div>
+      <div class="pattern-row"><span class="label">Comando:</span><span><code>mvn archetype:generate -DarchetypeArtifactId=archetype-bff ...</code></span></div>
+    </div>
+
+    <h2>5.2 archetype-microservice-jpa</h2>
+    <div class="pattern-card purple">
+      <div class="pattern-title">Arquetipo: Microservicio con Persistencia JPA</div>
+      <div class="pattern-type">Spring Boot 3 + Spring Data JPA + PostgreSQL + Lombok</div>
+      <div class="pattern-row"><span class="label">Genera:</span><span>Microservicio completo con Entity, Repository (Spring Data), Controller con CRUD completo y health check.</span></div>
+      <div class="pattern-row"><span class="label">Parámetros:</span><span><code>serviceName</code>, <code>servicePort</code>, <code>entityName</code></span></div>
+      <div class="pattern-row"><span class="label">Uso típico:</span><span>Servicios que gestionan datos propios: inventario, pedidos, envíos.</span></div>
+      <div class="pattern-row"><span class="label">Patrón interno:</span><span>Repository Pattern implementado con Spring Data JPA (<code>{Entity}Repository extends JpaRepository</code>).</span></div>
+    </div>
+
+    <h2>5.3 archetype-microservice-simple</h2>
+    <div class="pattern-card orange">
+      <div class="pattern-title">Arquetipo: Microservicio REST Ligero</div>
+      <div class="pattern-type">Spring Boot 3 + Spring Web + WebFlux (cliente)</div>
+      <div class="pattern-row"><span class="label">Genera:</span><span>Microservicio sin base de datos propia, con un controlador REST base y cliente WebFlux para integrar APIs externas.</span></div>
+      <div class="pattern-row"><span class="label">Parámetros:</span><span><code>serviceName</code>, <code>servicePort</code></span></div>
+      <div class="pattern-row"><span class="label">Uso típico:</span><span>Servicios de integración: pagos (Stripe/MercadoPago), notificaciones, autenticación externa.</span></div>
+    </div>
+
+    <h2>5.4 Relación entre Arquetipos y Microservicios SmartLogix</h2>
+    <table>
+      <thead>
+        <tr><th>Microservicio</th><th>Arquetipo base</th><th>Justificación</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>bff-service</td><td>archetype-bff</td><td>Agrega respuestas de múltiples servicios para el frontend</td></tr>
+        <tr><td>inventory-service</td><td>archetype-microservice-jpa</td><td>Gestiona productos, stock y bodegas en PostgreSQL</td></tr>
+        <tr><td>orders-service</td><td>archetype-microservice-jpa</td><td>Gestiona pedidos con estado persistente en PostgreSQL</td></tr>
+        <tr><td>shipping-service</td><td>archetype-microservice-jpa</td><td>Gestiona envíos con tracking en PostgreSQL</td></tr>
+        <tr><td>payment-service</td><td>archetype-microservice-simple</td><td>Integra APIs externas (Stripe, MercadoPago), sin BD propia</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. RESUMEN -->
+  <div class="section">
+    <h1>6. Resumen de Patrones Aplicados</h1>
+    <table>
+      <thead>
+        <tr><th>Patrón</th><th>Categoría</th><th>Componente</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Microservicios</td><td>Arquitectónico</td><td>Sistema completo</td></tr>
+        <tr><td>Backend For Frontend (BFF)</td><td>Arquitectónico</td><td>bff-service</td></tr>
+        <tr><td>API Gateway</td><td>Arquitectónico</td><td>nginx</td></tr>
+        <tr><td>Factory Method</td><td>Creacional (GoF)</td><td>inventory-service</td></tr>
+        <tr><td>Repository</td><td>Estructural / Datos</td><td>inventory, orders, shipping</td></tr>
+        <tr><td>Circuit Breaker</td><td>Comportamiento / Resiliencia</td><td>inventory-service</td></tr>
+        <tr><td>Interceptor</td><td>Comportamiento</td><td>frontend (Axios)</td></tr>
+        <tr><td>Rate Limiting</td><td>Estabilidad</td><td>nginx + bff-service</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Conclusión:</strong> La combinación de patrones arquitectónicos (Microservicios + BFF + API Gateway)
+      con patrones de diseño (Factory, Repository, Circuit Breaker) permite a SmartLogix ser un sistema
+      modular, resiliente y preparado para escalar. Los arquetipos Maven estandarizan la creación de nuevos
+      componentes, reduciendo el tiempo de configuración inicial y asegurando consistencia entre servicios.
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Instrucción impresión -->
+<div class="no-print" style="background:#fef3c7;border:1px solid #f59e0b;padding:12px 20px;text-align:center;font-size:10pt;">
+  <strong>Para exportar a PDF:</strong> Ctrl+P (o Cmd+P en Mac) → Destino: "Guardar como PDF" → Tamaño A4 → Sin márgenes → Guardar
+</div>
+
+</body>
+</html>

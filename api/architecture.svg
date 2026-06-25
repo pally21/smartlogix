@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <defs>
+    <style>
+      .box { fill:#f7fbff; stroke:#2b6cb0; stroke-width:2; rx:8; }
+      .svc { fill:#e6fff0; stroke:#2f855a; stroke-width:2; rx:6; }
+      .db { fill:#fff7e6; stroke:#d69e2e; stroke-width:2; rx:10; }
+      .text { font-family: Arial, Helvetica, sans-serif; font-size:14px; fill:#111827; }
+      .title { font-size:16px; font-weight:700; }
+      .arrow { stroke:#333; stroke-width:2; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <!-- Frontend + Nginx -->
+  <rect x="40" y="40" width="260" height="100" class="box" />
+  <text x="60" y="70" class="text title">Frontend</text>
+  <text x="60" y="92" class="text">React + Vite (SPA)</text>
+
+  <rect x="340" y="40" width="220" height="100" class="box" />
+  <text x="360" y="70" class="text title">Nginx (Static)</text>
+  <text x="360" y="92" class="text">Reverse proxy / cache</text>
+
+  <!-- BFF -->
+  <rect x="620" y="40" width="260" height="100" class="box" />
+  <text x="640" y="70" class="text title">BFF Service</text>
+  <text x="640" y="92" class="text">Orquestación / API</text>
+
+  <!-- arrows frontend->nginx->bff -->
+  <line x1="300" y1="90" x2="340" y2="90" class="arrow" />
+  <line x1="560" y1="90" x2="620" y2="90" class="arrow" />
+
+  <!-- Microservices cluster -->
+  <rect x="220" y="200" width="760" height="260" rx="12" fill="#f0f8ff" stroke="#a3bffa" />
+  <text x="240" y="225" class="text title">Microservicios</text>
+
+  <!-- individual services -->
+  <rect x="260" y="250" width="200" height="80" class="svc" />
+  <text x="280" y="280" class="text">Inventory</text>
+  <text x="280" y="300" class="text">Products / Stock</text>
+
+  <rect x="500" y="250" width="200" height="80" class="svc" />
+  <text x="520" y="280" class="text">Orders</text>
+  <text x="520" y="300" class="text">Order lifecycle</text>
+
+  <rect x="740" y="250" width="200" height="80" class="svc" />
+  <text x="760" y="280" class="text">Shipping</text>
+  <text x="760" y="300" class="text">Tracking / Status</text>
+
+  <rect x="500" y="360" width="200" height="80" class="svc" />
+  <text x="520" y="390" class="text">Payment</text>
+  <text x="520" y="410" class="text">Intents / Webhooks</text>
+
+  <!-- DB and MQ -->
+  <rect x="100" y="420" width="160" height="80" class="db" />
+  <text x="120" y="455" class="text">Postgres</text>
+  <text x="120" y="475" class="text">Persistencia (JPA/Sequelize)</text>
+
+  <ellipse cx="980" cy="460" rx="90" ry="40" fill="#f5f0ff" stroke="#805ad5" />
+  <text x="920" y="455" class="text">Message Queue</text>
+  <text x="920" y="475" class="text">(RabbitMQ / Kafka)</text>
+
+  <!-- connections BFF -> services -->
+  <line x1="750" y1="140" x2="750" y2="250" class="arrow" />
+  <line x1="740" y1="250" x2="740" y2="250" />
+
+  <line x1="690" y1="140" x2="360" y2="250" class="arrow" />
+
+  <!-- services -> DB -->
+  <line x1="360" y1="290" x2="200" y2="420" class="arrow" stroke-dasharray="6 4" />
+  <line x1="600" y1="290" x2="260" y2="420" class="arrow" stroke-dasharray="6 4" />
+  <line x1="820" y1="290" x2="320" y2="420" class="arrow" stroke-dasharray="6 4" />
+  <line x1="600" y1="400" x2="380" y2="480" class="arrow" stroke-dasharray="6 4" />
+
+  <!-- events to MQ -->
+  <line x1="760" y1="290" x2="900" y2="440" class="arrow" stroke-dasharray="4 4" />
+  <line x1="540" y1="370" x2="900" y2="440" class="arrow" stroke-dasharray="4 4" />
+
+  <!-- labels for communication -->
+  <text x="420" y="210" class="text">HTTP REST / JSON</text>
+  <text x="300" y="520" class="text">DB: SQL / JPA / Stored Procedures</text>
+
+</svg>

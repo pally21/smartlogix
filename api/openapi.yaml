@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: SmartLogix API
+  version: '1.0.0'
+  description: API unificada (BFF) para SmartLogix — documentación principal para la entrega.
+servers:
+  - url: http://localhost:4000
+    description: BFF local
+paths:
+  /api/inventory/products:
+    get:
+      summary: Listar productos
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Filtro de búsqueda
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Crear producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Producto creado
+
+  /api/inventory/products/{id}:
+    get:
+      summary: Obtener producto por id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': { description: 'Producto' }
+    put:
+      summary: Actualizar producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200': { description: 'Producto actualizado' }
+    delete:
+      summary: Eliminar producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': { description: 'Eliminado' }
+
+  /api/inventory/products/{id}/stock:
+    get:
+      summary: Obtener stock de producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 'Stock' }
+    post:
+      summary: Actualizar stock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockUpdate'
+      responses:
+        '200': { description: 'Stock actualizado' }
+
+  /api/inventory/warehouses:
+    get:
+      summary: Listar bodegas
+      responses: { '200': { description: 'Listado bodegas' } }
+    post:
+      summary: Crear bodega
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warehouse'
+      responses: { '201': { description: 'Bodega creada' } }
+
+  /api/inventory/warehouses/{id}:
+    delete:
+      summary: Eliminar bodega por id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Bodega eliminada' } }
+
+  /api/orders:
+    get:
+      summary: Listar órdenes
+      responses: { '200': { description: 'Listado órdenes' } }
+    post:
+      summary: Crear orden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses: { '201': { description: 'Orden creada' } }
+
+  /api/orders/{id}:
+    get:
+      summary: Obtener orden
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Orden' } }
+
+  /api/orders/{id}/status:
+    put:
+      summary: Actualizar estado de orden
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses: { '200': { description: 'Estado actualizado' } }
+
+  /api/orders/{id}/confirm-payment:
+    post:
+      summary: Confirmar pago de orden
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Pago confirmado' } }
+
+  /api/shipping:
+    get:
+      summary: Listar envíos
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: orderId
+          schema: { type: string }
+      responses: { '200': { description: 'Listado envíos' } }
+    post:
+      summary: Crear envío
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Shipment'
+      responses: { '201': { description: 'Envío creado' } }
+
+  /api/shipping/{id}:
+    get:
+      summary: Obtener envío
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Envío' } }
+
+  /api/shipping/track/{trackingNumber}:
+    get:
+      summary: Tracking público
+      parameters:
+        - in: path
+          name: trackingNumber
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Tracking' } }
+
+  /api/shipping/{id}/status:
+    put:
+      summary: Actualizar estado de envío
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses: { '200': { description: 'Estado actualizado' } }
+
+  /api/payment/create-intent:
+    post:
+      summary: Crear intención de pago
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentIntentRequest'
+      responses: { '200': { description: 'Intent creado' } }
+
+  /api/payment/{paymentId}/status:
+    get:
+      summary: Obtener estado de pago
+      parameters:
+        - in: path
+          name: paymentId
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Estado' } }
+
+  /api/payment/{paymentId}/refund:
+    post:
+      summary: Reembolso
+      parameters:
+        - in: path
+          name: paymentId
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: 'Reembolso procesado' } }
+
+  /api/dashboard/summary:
+    get:
+      summary: Resumen del dashboard
+      responses: { '200': { description: 'Resumen' } }
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        sku:
+          type: string
+        category:
+          type: string
+        unit:
+          type: string
+        minStock:
+          type: integer
+    StockUpdate:
+      type: object
+      properties:
+        quantity:
+          type: integer
+        location:
+          type: string
+    Warehouse:
+      type: object
+      properties:
+        name: { type: string }
+        address: { type: string }
+    Order:
+      type: object
+      properties:
+        customerId: { type: string }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+    OrderItem:
+      type: object
+      properties:
+        productId: { type: string }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+    Shipment:
+      type: object
+      properties:
+        orderId: { type: string }
+        productId: { type: string }
+        warehouseId: { type: string }
+        carrier: { type: string }
+        originAddress: { type: string }
+        destinationAddress: { type: string }
+        weight: { type: number }
+        estimatedDelivery: { type: string, format: date }
+    PaymentIntentRequest:
+      type: object
+      properties:
+        amount: { type: number }
+        currency: { type: string }
+        orderId: { type: string }

@@ -1,0 +1,15 @@
+# ignore cert private keys
+nginx/certs/*.key
+node_modules
+**/node_modules
+*.log
+coverage
+distnode_modules/
+.env
+*.tgz
+.scannerwork/
+coverage/
+dist/
+target/
+*.log
+.DS_Store
